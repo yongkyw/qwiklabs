@@ -2,9 +2,9 @@ export REGION=
 
 export ZONE=
 
-Task 1. Create multiple web server instances
+# Task 1. Create multiple web server instances
 
-//create multiple instances (3 instance) using CLI
+# Create multiple instances (3 instance) using CLI
 gcloud compute instances create web1 \
 --zone=$ZONE \
 --machine-type=e2-small \
@@ -44,11 +44,11 @@ echo "<h3>Web Server: web3</h3>" | tee /var/www/html/index.html'
 
 
 
-//create firewall that allow 80 and binding to network tag that instances have
+# Create firewall that allow 80 and binding to network tag that instances have
 gcloud compute firewall-rules create www-firewall-network-lb --allow tcp:80 --target-tags network-lb-tag
 
 
-Task 2. Configure the load balancing service
+# Task 2. Configure the load balancing service
 
 gcloud compute addresses create network-lb-ip-1 \
     --region=$REGION  
@@ -76,7 +76,7 @@ IPADDRESS=$(gcloud compute forwarding-rules describe www-rule --region=$REGION  
 
 
 
-Task 3. Create an HTTP load balancer
+# Task 3. Create an HTTP load balancer
 
 gcloud compute instance-templates create lb-backend-template \
    --region=$REGION \
@@ -104,7 +104,7 @@ gcloud compute instance-groups managed create lb-backend-group \
    --template=lb-backend-template --size=2 --zone=$ZONE 
 
 
-//create firewall rules that allow health check
+# Create firewall rules that allow health check
 gcloud compute firewall-rules create fw-allow-health-check \
   --network=default \
   --action=allow \

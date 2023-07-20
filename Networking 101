@@ -1,0 +1,132 @@
+# Task 1. Review the default network
+
+# Set zone and region
+gcloud config set compute/zone "place_holder_text"
+export ZONE=$(gcloud config get compute/zone)
+
+gcloud config set compute/region "place_holder_text"
+export REGION=$(gcloud config get compute/zone)
+
+
+# Task 2. Creating a custom network
+
+
+# Create custom network using subnet mode custom
+gcloud compute networks create taw-custom-network --subnet-mode custom
+
+
+# Task 4. Create custom network with Cloud Shell
+
+# Create subnets network on us-central, europe-west and asia-east
+gcloud compute networks subnets create subnet-us-central \
+   --network taw-custom-network \           # Type Network
+   --region us-central1 \                   # Region
+   --range 10.0.0.0/16                      # IP Subnet us-central
+
+gcloud compute networks subnets create subnet-europe-west \
+   --network taw-custom-network \
+   --region europe-west1 \
+   --range 10.1.0.0/16                      # IP Subnet europe-west
+
+gcloud compute networks subnets create subnet-asia-east \
+   --network taw-custom-network \
+   --region asia-east1 \
+   --range 10.2.0.0/16                      # IP Subnet asia-east
+
+
+# Task 5. Adding firewall rules
+
+
+# Create firewall rules to allow tcp:80 using through 0.0.0.0/0
+gcloud compute firewall-rules create nw101-allow-http \
+--allow tcp:80 --network taw-custom-network --source-ranges 0.0.0.0/0 \
+--target-tags http
+
+# Create firewall rules to allow icmp
+gcloud compute firewall-rules create "nw101-allow-icmp" --allow icmp --network "taw-custom-network" --target-tags rules
+
+# Create firewall rules to allow tcp:0-65535, udp:0-65535, and icmp
+gcloud compute firewall-rules create "nw101-allow-internal" --allow tcp:0-65535,udp:0-65535,icmp --network "taw-custom-network" --source-ranges "10.0.0.0/16","10.2.0.0/16","10.1.0.0/16"
+
+# Create firewall rules to allow tcp:22 (SSH)
+gcloud compute firewall-rules create "nw101-allow-ssh" --allow tcp:22 --network "taw-custom-network" --target-tags "ssh"
+
+# Create firewall rules to allow tcp:3389 (RDP)
+gcloud compute firewall-rules create "nw101-allow-rdp" --allow tcp:3389 --network "taw-custom-network"
+
+# Task 6. Connecting to your lab VMs and checking latency
+
+
+# Create VM Instances in each ZONE
+gcloud compute instances create us-test-01 \
+--subnet subnet-us-central \
+--zone us-central1-a \
+--machine-type=e2-medium \
+--tags ssh,http,rules
+
+gcloud compute instances create europe-test-01 \
+--subnet subnet-europe-west \
+--zone europe-west1-b \
+--tags ssh,http,rules
+
+gcloud compute instances create asia-test-01 \
+--subnet subnet-asia-east \
+--zone asia-east1-a \
+--machine-type e2-medium \
+--tags ssh,http,rules
+
+
+# Task 7. Traceroute and Performance testing
+
+# List all instance that running
+gcloud compute instances list
+
+# SSH to instance us-test-01
+gcloud compute ssh us-test-01 --zone us-central1-a
+gcloud compute ssh europe-test-01 --zone europe-west1-b
+gcloud compute ssh asia-test-01 --zone asia-east1-a
+
+
+
+# Use ping to measure latency
+ping -c 3 <europe-test-01-external-ip-address>
+ping -c 3 <asia-test-01-external-ip-address>
+
+ping -c 3 europe-test-01.europe-west1-b
+
+# Task 7. Traceroute and Performance testing
+
+sudo apt-get update
+sudo apt-get -y install traceroute mtr tcpdump iperf whois host dnsutils siege
+
+traceroute www.icann.org
+
+# Task 8. Use iperf to test performance
+
+# SSH to europe-test-01
+sudo apt-get update
+sudo apt-get -y install traceroute mtr tcpdump iperf whois host dnsutils siege
+
+iperf -s #run in server mode
+iperf -c us-test-01.us-central1-a #run in client mode, connection to eu1-vm
+
+# Between VMs within a region
+# Create instance
+gcloud compute instances create us-test-02 \
+--subnet subnet-us-central \
+--zone us-central1-b \
+--tags ssh,http
+
+# SSH to that new instances
+sudo apt-get update
+sudo apt-get -y install traceroute mtr tcpdump iperf whois host dnsutils siege
+
+# SSH to europe-test-01
+iperf -s -u #iperf server side
+
+# SSH to us-test-01
+iperf -c europe-test-01.europe-west1-b -u -b 2G #iperf client side - send 2 Gbits/s
+iperf -s
+
+# SSH to us-test-02
+iperf -c us-test-01.us-central1-a -P 20
