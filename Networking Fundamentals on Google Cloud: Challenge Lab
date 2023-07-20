@@ -2,7 +2,9 @@ export REGION=
 
 export ZONE=
 
+Task 1. Create multiple web server instances
 
+//create multiple instances (3 instance) using CLI
 gcloud compute instances create web1 \
 --zone=$ZONE \
 --machine-type=e2-small \
@@ -42,21 +44,20 @@ echo "<h3>Web Server: web3</h3>" | tee /var/www/html/index.html'
 
 
 
-
+//create firewall that allow 80 and binding to network tag that instances have
 gcloud compute firewall-rules create www-firewall-network-lb --allow tcp:80 --target-tags network-lb-tag
 
 
-
+Task 2. Configure the load balancing service
 
 gcloud compute addresses create network-lb-ip-1 \
     --region=$REGION  
 
 
-
 gcloud compute http-health-checks create basic-check
 
 
- gcloud compute target-pools create www-pool \
+gcloud compute target-pools create www-pool \
     --region=$REGION  --http-health-check basic-check
 
 
@@ -75,7 +76,7 @@ IPADDRESS=$(gcloud compute forwarding-rules describe www-rule --region=$REGION  
 
 
 
-#TASK 3
+Task 3. Create an HTTP load balancer
 
 gcloud compute instance-templates create lb-backend-template \
    --region=$REGION \
@@ -103,7 +104,7 @@ gcloud compute instance-groups managed create lb-backend-group \
    --template=lb-backend-template --size=2 --zone=$ZONE 
 
 
-
+//create firewall rules that allow health check
 gcloud compute firewall-rules create fw-allow-health-check \
   --network=default \
   --action=allow \
@@ -119,17 +120,13 @@ gcloud compute addresses create lb-ipv4-1 \
   --global
 
 
-
 gcloud compute addresses describe lb-ipv4-1 \
   --format="get(address)" \
   --global
 
 
-
-
 gcloud compute health-checks create http http-basic-check \
   --port 80
-
 
 
 gcloud compute backend-services create web-backend-service \
@@ -137,7 +134,6 @@ gcloud compute backend-services create web-backend-service \
   --port-name=http \
   --health-checks=http-basic-check \
   --global
-
 
 
 gcloud compute backend-services add-backend web-backend-service \
