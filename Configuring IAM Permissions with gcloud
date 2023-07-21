@@ -1,0 +1,23 @@
+Task 1. Configure the gcloud environment
+Open the list of compute instances by going to Navigation Menu > Compute Engine > VM instances.
+On the line with the compute instance named centos-clean, click SSH.
+
+# confirm that gcloud is successfully installed. Inside the SSH session run
+gcloud --version
+
+# Creating a new instance and updating the default zone
+# First, authenticate in gcloud. Inside the SSH session, run:
+gcloud auth login
+
+# Press ENTER when you see the prompt Do you want to continue (Y/n)?
+
+# Navigate to the link displayed in a new tab.
+
+# Click on your active username (student-04-bc204c0ac47d@qwiklabs.net), and click Allow.
+
+# When you see the prompt Enter the following verification code in gcloud CLI on the machine you want to log into, click on the copy button then go back to the SSH session, and paste the code into the prompt Enter authorization code:.
+
+# Inside the SSH session run:
+
+gcloud compute instances create lab-1
+
