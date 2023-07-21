@@ -1,0 +1,36 @@
+# Google Kubernetes Engine
+# In the cloud shell environment type the following command to set the zone:
+gcloud config set compute/zone us-central1-b
+
+# Start up a cluster for use in this lab:
+gcloud container clusters create io
+
+
+# Task 1. Get the sample code
+
+
+gsutil cp -r gs://spls/gsp021/* .
+
+cd orchestrate-with-kubernetes/kubernetes
+ls
+
+
+# Task 2. Quick Kubernetes Demo
+
+
+# Use it to launch a single instance of the nginx container:
+kubectl create deployment nginx --image=nginx:1.10.0
+
+# Use the kubectl get pods command to view the running nginx container:
+kubectl get pods
+
+# Once the nginx container has a Running status you can expose it outside of Kubernetes using the kubectl expose command:
+kubectl expose deployment nginx --port 80 --type LoadBalancer
+
+# List our services now using the kubectl get services command:
+kubectl get services
+
+
+# Task 3. Pods
+
+
