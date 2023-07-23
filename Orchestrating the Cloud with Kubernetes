@@ -1,3 +1,5 @@
+# Link : https://www.cloudskillsboost.google/focuses/557?parent=catalog
+
 # Google Kubernetes Engine
 # In the cloud shell environment type the following command to set the zone:
 gcloud config set compute/zone us-central1-b
@@ -32,5 +34,117 @@ kubectl get services
 
 
 # Task 3. Pods
+
+
+Pods represent and hold a collection of one or more containers. Generally, if you have multiple containers with a hard dependency on each other, you package the containers inside a single pod.
+
+Pods also have Volumes. Volumes are data disks that live as long as the pods live, and can be used by the containers in that pod. Pods provide a shared namespace for their contents which means that the two containers inside of our example pod can communicate with each other, and they also share the attached volumes.
+
+
+# Task 4. Creating pods
+
+
+# Go to dir
+cd ~/orchestrate-with-kubernetes/kubernetes
+
+# Run this command to look yaml config file
+cat pods/monolith.yaml
+
+# Create the monolith pod using kubectl:
+kubectl create -f pods/monolith.yaml
+
+# Examine your pods. Use the kubectl get pods command to list all pods running in the default namespace:
+kubectl get pods
+
+# Once the pod is running, use kubectl describe command to get more information about the monolith pod:
+kubectl describe pods monolith
+
+
+# Task 5. Interacting with pods
+
+
+# In the 2nd terminal, run this command to set up port-forwarding:
+kubectl port-forward monolith 10080:80
+
+# Now in the 1st terminal start talking to your pod using curl:
+curl http://127.0.0.1:10080
+
+# Now use secure protocol
+curl http://127.0.0.1:10080/secure
+
+# Login first
+curl -u user http://127.0.0.1:10080/login
+# input : password
+
+# Since Cloud Shell does not handle copying long strings well, create an environment variable for the token.
+TOKEN=$(curl http://127.0.0.1:10080/login -u user|jq -r '.token')
+# Input : password
+
+# Use this command to copy and then use the token to hit the secure endpoint with curl
+curl -H "Authorization: Bearer $TOKEN" http://127.0.0.1:10080/secure
+
+# Use the kubectl logs command to view the logs for the monolith Pod.
+kubectl logs monolith
+
+# Open 3rd terminal 
+kubectl logs -f monolith
+
+# Open 1st terminal
+curl http://127.0.0.1:10080
+# and check log on 3rd terminal that updated
+
+# Use the kubectl exec command to run an interactive shell inside the Monolith Pod. This can come in handy when you want to troubleshoot from within a container:
+kubectl exec monolith --stdin --tty -c monolith -- /bin/sh
+ping -c 3 google.com
+exit
+
+
+# Task 6. Services
+
+Pods arent meant to be persistent. They can be stopped or started for many reasons - like failed liveness or readiness checks - and this leads to a problem:
+
+What happens if you want to communicate with a set of Pods? When they get restarted they might have a different IP address.
+
+That's where Services come in. Services provide stable endpoints for Pods.
+
+Services use labels to determine what Pods they operate on. If Pods have the correct labels, they are automatically picked up and exposed by our services.
+
+The level of access a service provides to a set of pods depends on the Service's type. Currently there are three types:
+
+ClusterIP (internal) -- the default type means that this Service is only visible inside of the cluster,
+NodePort gives each node in the cluster an externally accessible IP and
+LoadBalancer adds a load balancer from the cloud provider which forwards traffic from the service to Nodes within it.
+
+
+# Task 7. Creating a service
+
+
+# If youve changed directories, make sure you return to the ~/orchestrate-with-kubernetes/kubernetes directory:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
